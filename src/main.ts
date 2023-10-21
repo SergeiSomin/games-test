@@ -1,5 +1,5 @@
 import './style.css'
-import { Application } from "pixi.js";
+import { Application, Text } from "pixi.js";
 import { IViewportData, Viewport } from './Viewport';
 import { BasePage, LoadPage, CardsPage,  } from './pages';
 import { AssetBundle } from './loadAssets';
@@ -31,6 +31,16 @@ const setResize = (app: Application, pages: BasePage[]) => {
 	return viewport;
 }
 
+const createFPSMeter = (app: Application) => {
+	const meter = new Text("", {fontSize: 35, fill: 0xffffff});
+	app.stage.addChild(meter);
+	app.ticker.add(() => {
+		meter.text = `FPS: ${app.ticker.FPS}`;
+	});
+
+	return meter;
+}
+
 interface ISwitchPageParams {
 	loadPage: LoadPage;
 	nextPage: BasePage;
@@ -55,6 +65,8 @@ const switchPage = async (params: ISwitchPageParams) => {
 const init = async () => {
 	const app = new Application<HTMLCanvasElement>();
 	document.body.appendChild(app.view);
+
+	createFPSMeter(app);
 
 	const loadPage = new LoadPage();
 	const cardsPage = new CardsPage(AssetBundle.CARDS);
