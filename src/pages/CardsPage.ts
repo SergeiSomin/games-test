@@ -173,7 +173,7 @@ class Deck {
 	removeCard() {
 		const card = this._cards.pop();
 
-		if(this._cards.length <= 7) {
+		if(this._cards.length <= DECK_MAX_VISIBLE_CARDS) {
 			this._tops.visible = false;
 		}
 
@@ -188,7 +188,7 @@ class Deck {
 	addTopCard(type: string) {
 		this._cards.push(type);
 
-		if(this._cards.length > 7) {
+		if(this._cards.length > DECK_MAX_VISIBLE_CARDS) {
 			this._tops.visible = true;
 		}
 

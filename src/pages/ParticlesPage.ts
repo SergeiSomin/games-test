@@ -80,11 +80,9 @@ export class ParticlesPage extends BasePage {
 	}
 
 	resize({centerX, centerY}: IViewportData): void {
-		if(!this._particles) {
-			return;
+		if(this._particles) {
+			this._particles.spawnPos.x = centerX;
+			this._particles.spawnPos.y = centerY;
 		}
-
-		this._particles.spawnPos.x = centerX;
-		this._particles.spawnPos.y = centerY;
 	}
 }

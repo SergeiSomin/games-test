@@ -8,7 +8,7 @@ import { ToolPage } from './pages/ToolPage';
 const APP_WIDTH = 1920;
 const APP_HEIGHT = 1080;
 
-const setResize = (app: Application, pages: BasePage[]) => {
+const setResize = (app: Application, pages: BasePage[], pageSwitcher: PageSwitcher) => {
 	const viewport = new Viewport({
 		width: APP_WIDTH,
 		height: APP_HEIGHT,
@@ -22,6 +22,8 @@ const setResize = (app: Application, pages: BasePage[]) => {
 			pages.forEach((page) => {
 				page.resize(viewport);
 			});
+
+			pageSwitcher.resize(viewport);
 		}
 	});
 	window.addEventListener("resize", () => viewport.resize());
@@ -59,14 +61,13 @@ const init = async () => {
 	];
 	pages.forEach((page) => app.stage.addChild(page.container));
 
-	const viewport = setResize(app, pages);
-
 	const pageSwitcher = new PageSwitcher({
 		pages: [cardsPage, toolPage, particlesPage],
 		loadPage: loadPage,
-		viewport: viewport,
 		app: app,
 	});
+
+	setResize(app, pages, pageSwitcher);
 
 	pageSwitcher.nextPage();
 
