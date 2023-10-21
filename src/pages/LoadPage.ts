@@ -55,6 +55,14 @@ export class LoadPage extends BasePage {
 		);
 	}
 
+	show(): void {
+
+	}
+	
+	hide(): void {
+		
+	}
+
 	resize({centerX, centerY}: IViewportData): void {
 		this._progressBarBackground.x = centerX;
 		this._progressBarBackground.y = centerY;

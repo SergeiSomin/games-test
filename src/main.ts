@@ -1,10 +1,9 @@
 import './style.css'
 import { Application, Text } from "pixi.js";
 import { IViewportData, Viewport } from './Viewport';
-import { BasePage, LoadPage, CardsPage,  } from './pages';
+import { BasePage, LoadPage, CardsPage, PageSwitcher, ParticlesPage } from './pages';
 import { AssetBundle } from './loadAssets';
 import { ToolPage } from './pages/ToolPage';
-import { ParticlesPage } from './pages/ParticlesPage';
 
 const APP_WIDTH = 1920;
 const APP_HEIGHT = 1080;
@@ -41,27 +40,6 @@ const createFPSMeter = (app: Application) => {
 	return meter;
 }
 
-interface ISwitchPageParams {
-	loadPage: LoadPage;
-	nextPage: BasePage;
-	viewport: Viewport;
-	previousPage?: BasePage
-}
-const switchPage = async (params: ISwitchPageParams) => {
-	const {loadPage, nextPage, viewport, previousPage} = params;
-
-	if(previousPage) {
-		previousPage.hide();
-		await previousPage.unload();
-	}
-	
-	loadPage.show();
-	await nextPage.load((progress: number) => loadPage.setProgress(progress));
-	loadPage.hide();
-	nextPage.show();
-	nextPage.resize(viewport.getCurrent());
-}
-
 const init = async () => {
 	const app = new Application<HTMLCanvasElement>();
 	document.body.appendChild(app.view);
@@ -82,10 +60,24 @@ const init = async () => {
 	pages.forEach((page) => app.stage.addChild(page.container));
 
 	const viewport = setResize(app, pages);
-	await switchPage({
-		loadPage,
-		viewport,
-		nextPage: cardsPage
+
+	const pageSwitcher = new PageSwitcher({
+		pages: [cardsPage, toolPage, particlesPage],
+		loadPage: loadPage,
+		viewport: viewport,
+		app: app,
+	});
+
+	pageSwitcher.nextPage();
+
+	window.addEventListener("keypress", ({code}) => {
+		if(code == "KeyA") {
+			pageSwitcher.previousPage();
+		}
+
+		if(code == "KeyD") {
+			pageSwitcher.nextPage();
+		}
 	});
 }
 

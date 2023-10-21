@@ -3,6 +3,7 @@ import { Container, ITextStyle, Text, Sprite, Texture, DisplayObject } from "pix
 import { IViewportData } from "../Viewport";
 import { BasePage } from "./BasePage";
 import { arrayFill, randomIntRange } from "../utils";
+import { AssetBundle } from "../loadAssets";
 
 const TOOL_ITEM_NUMBER = 3;
 const TOOL_ITEM_GAP = 10;
@@ -43,16 +44,6 @@ class SpriteTextRow {
 		return text;
 	}
 
-	private clearItems() {
-		this._spriteItems.forEach(item => {
-			item.visible = false;
-		});
-
-		this._textItems.forEach(item => {
-			item.visible = false;
-		});
-	}
-
 	private applyLayout(layout: SpriteTextRowLayout, x: number, y: number) {
 		const halfWidth = layout.width / 2;
 		for(let i = 0; i < layout.items.length; i++) {
@@ -64,7 +55,7 @@ class SpriteTextRow {
 	}
 
 	setItems(items: RowItem[]) {
-		this.clearItems();
+		this.reset();
 
 		const layoutData = {width: 0, offsets: [], items: []};
 
@@ -96,12 +87,27 @@ class SpriteTextRow {
 		this._y = y;
 		this.applyLayout(this._layout, this._x, this._y);
 	}
+
+	reset() {
+		this._spriteItems.forEach(item => {
+			item.visible = false;
+		});
+
+		this._textItems.forEach(item => {
+			item.visible = false;
+		});
+	}
 }
 
 export class ToolPage extends BasePage {
 
-	private _row?: SpriteTextRow;
+	private _row: SpriteTextRow;
 	private _tween?: gsap.core.Tween;
+
+	constructor(assetBundle: AssetBundle) {
+		super(assetBundle);
+		this._row = new SpriteTextRow(this.container, TOOL_ITEM_NUMBER);
+	}
 
 	private getRandomItem(): RowItem {
 		if(Math.random() > 0.5) {
@@ -136,17 +142,15 @@ export class ToolPage extends BasePage {
 	}
 
 	show() {
-		this._row = new SpriteTextRow(this.container, TOOL_ITEM_NUMBER);
-		this.changeItems(this._row!);
-		this._tween = gsap.delayedCall(2, () => this.changeItems(this._row!));
+		this.changeItems(this._row);
 	}
 
 	hide() {
-		if(!this._tween) {
-			return;
+		if(this._tween) {
+			this._tween.kill();
 		}
 
-		this._tween.kill();
+		this._row?.reset();
 	}
 
 	resize({centerX, centerY}: IViewportData): void {

@@ -3,6 +3,7 @@ import { Container, Sprite, Text, Texture } from "pixi.js";
 import { IViewportData } from "../Viewport";
 import { BasePage } from "./BasePage";
 import { arrayFill, randomIntRange, zeroPad } from "../utils";
+import { AssetBundle } from "../loadAssets";
 
 const DECK_CENTER_OFFSET_X = 450;
 const DECK_CENTER_OFFSET_Y = -250;
@@ -15,12 +16,15 @@ const DECK_CARD_OFFSET = 45;
 
 class Card {
 
+	private _container: Container;
 	private _isMoving: boolean;
 	private _type: string;
 	private _sprite: Sprite;
+	private _tween?: gsap.core.Tween;
 
 	constructor(container: Container) {
 		this._type = "";
+		this._container = container;
 		this._isMoving = false;
 		this._sprite = this.createSprite(container);
 	}
@@ -35,11 +39,13 @@ class Card {
 	async move(from: {x: number; y: number}, to: {x: number; y: number}, time: number) {
 		this._isMoving = true;
 
-		await gsap.fromTo(this._sprite, {x: from.x, y: from.y}, {
+		this._tween = gsap.fromTo(this._sprite, {x: from.x, y: from.y}, {
 			x: to.x,
 			y: to.y,
 			duration: time,
 		});
+
+		await this._tween;
 
 		this._isMoving = false;
 	}
@@ -69,20 +75,31 @@ class Card {
 	setZIndex(zIndex: number) {
 		this._sprite.zIndex = zIndex;
 	}
+
+	destroy() {
+		if(this._tween) {
+			this._tween.kill();
+		}
+
+		this._container.removeChild(this._sprite);
+	}
+
 }
 
 
 class Deck {
-	private _cardsNumberText: Text;
 
+	private _container: Container;
 	private _x: number;
 	private _y: number;
+	private _cardsNumberText: Text;
 	private _tops: Sprite;
 	private _visibleCards: Card[];
 	private _cards: string[];
 	private _cardsNumber: number = 0;
 	
 	constructor(container: Container) {
+		this._container = container;
 		this._visibleCards = arrayFill<Card>(DECK_MAX_VISIBLE_CARDS, () => this.createCard(container, ""));
 		this._cardsNumberText = this.createCardsNumberText(container);
 		this._tops = this.createTops(container);
@@ -90,6 +107,7 @@ class Deck {
 		this._x = 0;
 		this._y = 0;
 		this._cardsNumber = 0;
+		this.updateVisibleCards();
 	}
 
 	private createCardsNumberText(container: Container) {
@@ -131,6 +149,7 @@ class Deck {
 	}
 
 	setPosition(x: number, y: number) {
+
 		this._x = x;
 		this._y = y;
 		this._cardsNumberText.x = x;
@@ -181,6 +200,12 @@ class Deck {
 		const index = Math.min(this._cardsNumber, DECK_MAX_VISIBLE_CARDS) - 1;
 		return this._visibleCards[index] ? this._visibleCards[index].getPosition() : {x: this._x, y: this._y};
 	}
+
+	destroy() {
+		this._container.removeChild(this._cardsNumberText);
+		this._container.removeChild(this._tops);
+		this._visibleCards.forEach(card => card.destroy());
+	}
 }
 
 
@@ -190,6 +215,14 @@ export class CardsPage extends BasePage {
 	private _deck2?: Deck;
 	private _movingCards?: Card[];
 	private _tween?: gsap.core.Tween;
+	private _movingCardsContainer: Container;
+
+	constructor(assetBundle: AssetBundle) {
+		super(assetBundle);
+
+		this._movingCardsContainer = new Container();
+		this._movingCardsContainer.sortableChildren = true;
+	}
 
 	private getRandomCardType() {
 		return `d${zeroPad(randomIntRange(1, 13).toString(), 2)}`;
@@ -206,17 +239,13 @@ export class CardsPage extends BasePage {
 	}
 
 	show(): void {
-		super.show();
-
 		this._deck1 = new Deck(this.container);
 		this._deck2 = new Deck(this.container);
 
-		const movingCardsContainer = new Container();
-		movingCardsContainer.sortableChildren = true;
-		this.container.addChild(movingCardsContainer);
-
 		const maxMovingCards = Math.ceil(DECK_CARD_MOVE_TIME / DECK_CARD_SPAWN_DELAY) + 1;
-		this._movingCards = arrayFill(maxMovingCards, () => new Card(movingCardsContainer));
+		this._movingCards = arrayFill(maxMovingCards, () => new Card(this._movingCardsContainer));
+
+		this.container.addChild(this._movingCardsContainer);
 
 		for(let i = 0; i < 144; i++) {
 			this._deck1.addTopCard(this.getRandomCardType());
@@ -227,11 +256,22 @@ export class CardsPage extends BasePage {
 	}
 
 	hide(): void {
-		if(!this._tween) {
-			return;
+		if(this._tween) {
+			this._tween.kill();
 		}
 
-		this._tween.kill();
+		if(this._movingCards) {
+			this._movingCards.forEach((card) => card.destroy());
+			this.container.removeChild(this._movingCardsContainer);
+		}
+
+		if(this._deck1) {
+			this._deck1.destroy();
+		}
+
+		if(this._deck2) {
+			this._deck2.destroy();
+		}
 	}
 
 	async moveAnimation() {

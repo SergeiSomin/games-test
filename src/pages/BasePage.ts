@@ -41,12 +41,6 @@ export abstract class BasePage {
 	}
 
 	abstract resize(viewport: IViewportData): void;
-
-	show(): void {
-		this.container.visible = true;
-	}
-
-	hide(): void {
-		this.container.visible = false
-	}
+	abstract show(): void;
+	abstract hide(): void;
 }

@@ -2,6 +2,7 @@ import { Emitter, upgradeConfig } from "@pixi/particle-emitter";
 import { IViewportData } from "../Viewport";
 import { BasePage } from "./BasePage";
 import { ParticleContainer } from "pixi.js";
+import { AssetBundle } from "../loadAssets";
 
 const particleConfig = {
 	"alpha": {
@@ -57,17 +58,25 @@ const particleConfig = {
 	}
 };
 
-
 export class ParticlesPage extends BasePage {
 
 	private _particles?: Emitter;
+	private _particleContainer: ParticleContainer;
+
+	constructor(assetBundle: AssetBundle) {
+		super(assetBundle);
+		this._particleContainer = new ParticleContainer();
+		this.container.addChild(this._particleContainer);
+	}
 
 	show() {
-		const particleContainer = new ParticleContainer();
-		this.container.addChild(particleContainer);
-		this._particles = new Emitter(particleContainer, upgradeConfig(particleConfig, "fire"));
+		this._particles = new Emitter(this._particleContainer, upgradeConfig(particleConfig, "fire"));
 		this._particles.autoUpdate = true;
 		this._particles.emit = true;
+	}
+
+	hide() {
+		this._particles?.destroy();
 	}
 
 	resize({centerX, centerY}: IViewportData): void {
