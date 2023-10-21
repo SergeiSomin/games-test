@@ -1,0 +1,22 @@
+{
+	"name": "ancient-games-test",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"build:assets": "assetpack -c .assetpack.js"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.2",
+		"vite": "^4.4.5"
+	},
+	"dependencies": {
+		"@pixi/particle-emitter": "^5.0.8",
+		"gsap": "^3.12.2",
+		"pixi.js": "^7.3.2"
+	},
+	"author": "Serhii Somin (sominsergei@gmail.com)"
+}
