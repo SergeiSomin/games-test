@@ -1,4 +1,4 @@
-import { Container, Graphics } from "pixi.js";
+import { Graphics } from "pixi.js";
 import { IViewportData } from "../Viewport";
 import { BasePage } from "./BasePage";
 
@@ -58,7 +58,7 @@ export class LoadPage extends BasePage {
 	show(): void {
 
 	}
-	
+
 	hide(): void {
 		
 	}
