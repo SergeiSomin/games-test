@@ -1,5 +1,5 @@
 import './style.css'
-import { Application, Assets } from "pixi.js";
+import { Application } from "pixi.js";
 import { IViewportData, Viewport } from './Viewport';
 import { BasePage, LoadPage, CardsPage,  } from './pages';
 import { AssetBundle } from './loadAssets';
@@ -25,11 +25,20 @@ const setResize = (app: Application, pages: BasePage[]) => {
 			});
 		}
 	});
-	viewport.resize()
 	window.addEventListener("resize", () => viewport.resize());
+	viewport.resize();
+
+	return viewport;
 }
 
-const switchPage = async (loadPage: LoadPage, nextPage: BasePage, previousPage?: BasePage) => {
+interface ISwitchPageParams {
+	loadPage: LoadPage;
+	nextPage: BasePage;
+	viewport: Viewport;
+	previousPage?: BasePage
+}
+const switchPage = async (params: ISwitchPageParams) => {
+	const {loadPage, nextPage, viewport, previousPage} = params;
 
 	if(previousPage) {
 		previousPage.hide();
@@ -40,16 +49,17 @@ const switchPage = async (loadPage: LoadPage, nextPage: BasePage, previousPage?:
 	await nextPage.load((progress: number) => loadPage.setProgress(progress));
 	loadPage.hide();
 	nextPage.show();
+	nextPage.resize(viewport.getCurrent());
 }
 
 const init = async () => {
 	const app = new Application<HTMLCanvasElement>();
 	document.body.appendChild(app.view);
 
-	const loadPage = new LoadPage(app.stage);
-	const cardsPage = new CardsPage(app.stage, AssetBundle.CARDS);
-	const toolPage = new ToolPage(app.stage, AssetBundle.MIX_TOOL);
-	const particlesPage = new ParticlesPage(app.stage, AssetBundle.PARTICLES);
+	const loadPage = new LoadPage();
+	const cardsPage = new CardsPage(AssetBundle.CARDS);
+	const toolPage = new ToolPage(AssetBundle.MIX_TOOL);
+	const particlesPage = new ParticlesPage(AssetBundle.PARTICLES);
 
 	const pages = [
 		loadPage,
@@ -57,10 +67,14 @@ const init = async () => {
 		toolPage,
 		particlesPage
 	];
+	pages.forEach((page) => app.stage.addChild(page.container));
 
-	setResize(app, pages);
-
-	await switchPage(loadPage, cardsPage);
+	const viewport = setResize(app, pages);
+	await switchPage({
+		loadPage,
+		viewport,
+		nextPage: cardsPage
+	});
 }
 
 

@@ -13,8 +13,8 @@ export class LoadPage extends BasePage {
 	private _progressBarBackground: Graphics;
 	private _progressBar: Graphics;
 
-	constructor(container: Container) {
-		super(container);
+	constructor() {
+		super();
 
 		this._progressBarBackground = this.createProgressBarBackground();
 		this._progressBar = this.createProgressBar();

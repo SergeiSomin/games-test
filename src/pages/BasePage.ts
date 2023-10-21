@@ -4,14 +4,14 @@ import { IViewportData } from "../Viewport";
 
 export abstract class BasePage {
 
-	protected container: Container;
+	public container: Container;
 
 	private _assetsLoaded: boolean = false;
 	private _assetBundle?: AssetBundle;
 
-	constructor(container: Container, assetBundle?: AssetBundle) {
-		this.container = container;
+	constructor(assetBundle?: AssetBundle) {
 		this._assetBundle = assetBundle;
+		this.container = new Container();
 	}
 
 	async load(onProgress?: (progress: number) => void) {
