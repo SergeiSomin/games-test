@@ -85,7 +85,7 @@ const init = async () => {
 	await switchPage({
 		loadPage,
 		viewport,
-		nextPage: toolPage
+		nextPage: cardsPage
 	});
 }
 
