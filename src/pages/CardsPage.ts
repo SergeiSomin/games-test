@@ -10,6 +10,7 @@ const DECK_CARD_MOVE_TIME = 2;
 const DECK_CARD_SPAWN_DELAY = 1;
 const DECK_MAX_VISIBLE_CARDS = 11;
 const DECK_TOPS_OFFSET = 260;
+const DECK_COUNTER_OFFSET = DECK_TOPS_OFFSET + 50;
 const DECK_CARD_OFFSET = 45;
 
 class Card {
@@ -72,8 +73,6 @@ class Card {
 
 
 class Deck {
-
-
 	private _cardsNumberText: Text;
 
 	private _x: number;
@@ -94,7 +93,8 @@ class Deck {
 	}
 
 	private createCardsNumberText(container: Container) {
-		const text = new Text();
+		const text = new Text("", {fontSize: 32, fill: 0xffffff});
+		text.anchor.set(0.5, 1);
 		container.addChild(text);
 		return text;
 	}
@@ -126,9 +126,15 @@ class Deck {
 		});
 	}
 
+	private updateCardsCounter() {
+		this._cardsNumberText.text = `${this._cards.length} Cards`;
+	}
+
 	setPosition(x: number, y: number) {
 		this._x = x;
 		this._y = y;
+		this._cardsNumberText.x = x;
+		this._cardsNumberText.y = y - DECK_COUNTER_OFFSET;
 		this._tops.x = x;
 		this._tops.y = y - DECK_TOPS_OFFSET;
 		this._visibleCards.forEach((card, index) => card.setPosition(x, y + index * DECK_CARD_OFFSET));
@@ -153,6 +159,7 @@ class Deck {
 		}
 
 		this.updateVisibleCards();
+		this.updateCardsCounter();
 
 		this._cardsNumber -= 1;
 
@@ -167,6 +174,7 @@ class Deck {
 		}
 
 		this.updateVisibleCards();
+		this.updateCardsCounter();
 	}
 
 	getTopCardPosition() {
