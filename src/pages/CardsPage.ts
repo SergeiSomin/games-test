@@ -1,3 +1,4 @@
+import gsap from "gsap";
 import { Container, Point, Sprite, Texture } from "pixi.js";
 import { IViewportData } from "../Viewport";
 import { BasePage } from "./BasePage";
@@ -31,7 +32,13 @@ class Card {
 
 	setType(type: string) {
 		this._type = type;
-		this._sprite.texture = Texture.from(type);
+
+		if(type) {
+			this._sprite.visible = true;
+			this._sprite.texture = Texture.from(type);
+		} else {
+			this._sprite.visible = false;
+		}
 	}
 
 	getType() {
@@ -47,18 +54,32 @@ class Deck {
 
 	private _tops: Sprite;
 	private _visibleCards: Card[];
+	private _cards: string[];
 
-	constructor(container: Container, cards: string[]) {
-		this._visibleCards = arrayFill<Card>(DECK_MAX_VISIBLE_CARDS, (index) => this.createCard(container, cards[index]));
-		this._tops = Sprite.from("tops");
-		container.addChild(this._tops);
-		this._tops.anchor.set(0.5, 1);
+	constructor(container: Container) {
+		this._visibleCards = arrayFill<Card>(DECK_MAX_VISIBLE_CARDS, () => this.createCard(container, ""));
+		this._tops = this.createTops(container);
+		this._cards = [];
 	}
 
 	private createCard(container: Container, type: string) {
 		const card = new Card(container);
 		card.setType(type);
 		return card;
+	}
+
+	private createTops(container: Container,) {
+		const tops = Sprite.from("tops");
+		container.addChild(tops);
+		tops.anchor.set(0.5, 1);
+		tops.visible = false;
+		return tops;
+	}
+
+	private updateVisibleCards() {
+		this._cards
+			.slice(-DECK_MAX_VISIBLE_CARDS)
+			.forEach((cardType, index) => this._visibleCards[index].setType(cardType));
 	}
 
 	setPosition(x: number, y: number) {
@@ -68,11 +89,25 @@ class Deck {
 	}
 
 	removeCard() {
+		const card = this._cards.pop();
 
+		if(this._cards.length <= 7) {
+			this._tops.visible = false;
+		}
+
+		this.updateVisibleCards();
+
+		return card;
 	}
 
-	addCard() {
+	addCard(type: string) {
+		this._cards.push(type);
 
+		if(this._cards.length > 7) {
+			this._tops.visible = true;
+		}
+
+		this.updateVisibleCards();
 	}
 }
 
@@ -91,10 +126,23 @@ export class CardsPage extends BasePage {
 	}
 
 	show(): void {
-		this._deck1 = new Deck(this.container, arrayFill(144, () => this.getRandomCardType()));
-		this._deck2 = new Deck(this.container, arrayFill(144, () => this.getRandomCardType()));
+		this._deck1 = new Deck(this.container);
+		this._deck2 = new Deck(this.container);
 
-		super.show();	
+
+		for(let i = 0; i < 144; i++) {
+			this._deck1.addCard(this.getRandomCardType());
+		}
+
+		super.show();
+
+		this.startAnimation();
+	}
+
+	startAnimation() {
+		const cardType = this._deck1?.removeCard();
+		this._deck2?.addCard(cardType!);
+		gsap.delayedCall(1, () => this.startAnimation());
 	}
 
 	resize({centerX, centerY}: IViewportData): void {
