@@ -35,7 +35,7 @@ const createFPSMeter = (app: Application) => {
 	const meter = new Text("", {fontSize: 35, fill: 0xffffff});
 	app.stage.addChild(meter);
 	app.ticker.add(() => {
-		meter.text = `FPS: ${app.ticker.FPS}`;
+		meter.text = `FPS: ${app.ticker.FPS.toFixed(2)}`;
 	});
 
 	return meter;
@@ -85,7 +85,7 @@ const init = async () => {
 	await switchPage({
 		loadPage,
 		viewport,
-		nextPage: cardsPage
+		nextPage: toolPage
 	});
 }
 
