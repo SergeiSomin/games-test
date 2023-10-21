@@ -11,7 +11,12 @@
 	},
 	"devDependencies": {
 		"typescript": "^5.0.2",
-		"vite": "^4.4.5"
+		"vite": "^4.4.5",
+		"@assetpack/cli": "^0.7.0",
+		"@assetpack/core": "^0.7.0",
+		"@assetpack/plugin-compress": "^0.7.0",
+		"@assetpack/plugin-manifest": "^0.7.0",
+		"@assetpack/plugin-texture-packer": "^0.7.0"
 	},
 	"dependencies": {
 		"@pixi/particle-emitter": "^5.0.8",

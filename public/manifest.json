@@ -1,0 +1,68 @@
+{
+  "bundles": [
+    {
+      "name": "default",
+      "assets": []
+    },
+    {
+      "name": "cards",
+      "assets": [
+        {
+          "name": [
+            "cards/cards.json"
+          ],
+          "srcs": [
+            "cards/cards@1x.json",
+            "cards/cards@0.5x.json"
+          ],
+          "data": {
+            "tags": {
+              "m": true,
+              "tps": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "mix-tool",
+      "assets": [
+        {
+          "name": [
+            "mix-tool/mix-tool.json"
+          ],
+          "srcs": [
+            "mix-tool/mix-tool@1x.json",
+            "mix-tool/mix-tool@0.5x.json"
+          ],
+          "data": {
+            "tags": {
+              "m": true,
+              "tps": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "particles",
+      "assets": [
+        {
+          "name": [
+            "particles/particles.json"
+          ],
+          "srcs": [
+            "particles/particles@1x.json",
+            "particles/particles@0.5x.json"
+          ],
+          "data": {
+            "tags": {
+              "m": true,
+              "tps": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
