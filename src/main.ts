@@ -1,31 +1,18 @@
 import './style.css'
-import { Application } from "pixi.js";
+import { Application, Assets } from "pixi.js";
 import { IViewportData, Viewport } from './Viewport';
-import { CardsPage } from './pages';
+import { BasePage, LoadPage, CardsPage,  } from './pages';
 import { AssetBundle } from './loadAssets';
 import { ToolPage } from './pages/ToolPage';
 import { ParticlesPage } from './pages/ParticlesPage';
-import { LoadPage } from './pages/LoadPage';
 
-const init = async () => {
-	const app = new Application<HTMLCanvasElement>();
-	document.body.appendChild(app.view);
+const APP_WIDTH = 1920;
+const APP_HEIGHT = 1080;
 
-	const loadPage = new LoadPage();
-	const cardsPage = new CardsPage(AssetBundle.CARDS);
-	const toolPage = new ToolPage(AssetBundle.MIX_TOOL);
-	const particlesPage = new ParticlesPage(AssetBundle.PARTICLES);
-
-	const pages = [
-		loadPage,
-		cardsPage,
-		toolPage,
-		particlesPage
-	];
-
+const setResize = (app: Application, pages: BasePage[]) => {
 	const viewport = new Viewport({
-		width: 1920,
-		height: 1080,
+		width: APP_WIDTH,
+		height: APP_HEIGHT,
 		onResized: (viewport: IViewportData) => {
 			const {windowWidth, windowHeight, width, height} = viewport;
 			app.renderer.view.style!.width = `${windowWidth}px`;
@@ -38,17 +25,42 @@ const init = async () => {
 			});
 		}
 	});
-
 	viewport.resize()
 	window.addEventListener("resize", () => viewport.resize());
+}
 
+const switchPage = async (loadPage: LoadPage, nextPage: BasePage, previousPage?: BasePage) => {
 
+	if(previousPage) {
+		previousPage.hide();
+		await previousPage.unload();
+	}
+	
+	loadPage.show();
+	await nextPage.load((progress: number) => loadPage.setProgress(progress));
+	loadPage.hide();
+	nextPage.show();
+}
 
-	// await loadAssets(AssetBundle.CARDS);
-	// console.log(Assets.cache.get("d01"));
+const init = async () => {
+	const app = new Application<HTMLCanvasElement>();
+	document.body.appendChild(app.view);
 
-	// await unloadAssets(AssetBundle.CARDS);
-	// console.log(Assets.cache.get("d01"));
+	const loadPage = new LoadPage(app.stage);
+	const cardsPage = new CardsPage(app.stage, AssetBundle.CARDS);
+	const toolPage = new ToolPage(app.stage, AssetBundle.MIX_TOOL);
+	const particlesPage = new ParticlesPage(app.stage, AssetBundle.PARTICLES);
+
+	const pages = [
+		loadPage,
+		cardsPage,
+		toolPage,
+		particlesPage
+	];
+
+	setResize(app, pages);
+
+	await switchPage(loadPage, cardsPage);
 }
 
 
