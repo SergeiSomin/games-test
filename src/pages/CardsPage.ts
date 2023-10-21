@@ -189,6 +189,7 @@ export class CardsPage extends BasePage {
 	private _deck1?: Deck;
 	private _deck2?: Deck;
 	private _movingCards?: Card[];
+	private _tween?: gsap.core.Tween;
 
 	private getRandomCardType() {
 		return `d${zeroPad(randomIntRange(1, 13).toString(), 2)}`;
@@ -222,7 +223,15 @@ export class CardsPage extends BasePage {
 			this._deck1.increaseCardsNumber();
 		}
 
-		gsap.delayedCall(DECK_CARD_SPAWN_DELAY, () => this.moveAnimation());
+		this._tween = gsap.delayedCall(DECK_CARD_SPAWN_DELAY, () => this.moveAnimation());
+	}
+
+	hide(): void {
+		if(!this._tween) {
+			return;
+		}
+
+		this._tween.kill();
 	}
 
 	async moveAnimation() {
@@ -235,7 +244,7 @@ export class CardsPage extends BasePage {
 			return;
 		}
 
-		gsap.delayedCall(DECK_CARD_SPAWN_DELAY, () => this.moveAnimation());
+		this._tween = gsap.delayedCall(DECK_CARD_SPAWN_DELAY, () => this.moveAnimation());
 
 		const card = this.spawnMovingCard(cardType);
 		await card.move(from, to, DECK_CARD_MOVE_TIME);
